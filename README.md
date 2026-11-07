@@ -5,6 +5,10 @@
 
 ## Установка
 
+### macOS / Linux
+
+Копией:
+
 ```sh
 cp keymap.json ~/.config/zed/keymap.json
 ```
@@ -14,3 +18,19 @@ cp keymap.json ~/.config/zed/keymap.json
 ```sh
 ln -sf "$PWD/keymap.json" ~/.config/zed/keymap.json
 ```
+
+### Windows
+
+Zed читает `%APPDATA%\Zed\keymap.json`. В PowerShell из папки репозитория — копией:
+
+```powershell
+Copy-Item keymap.json "$env:APPDATA\Zed\keymap.json" -Force
+```
+
+Или симлинком (нужен режим разработчика в «Параметры → Для разработчиков» либо PowerShell от администратора):
+
+```powershell
+New-Item -ItemType SymbolicLink -Path "$env:APPDATA\Zed\keymap.json" -Target "$PWD\keymap.json" -Force
+```
+
+`cmd-shift-c` на Windows — это Win+Shift+C: сочетание может перехватить система.
