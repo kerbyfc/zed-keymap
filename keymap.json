@@ -185,8 +185,12 @@
       "ctrl-y": "editor::MoveToNextWordEnd"
     }
   },
+  // Дефолтное secondary-shift-c — фокус панели совместной работы: на macOS в Workspace,
+  // на Windows в "!Terminal" (каждый узел, кроме терминала). Снимается тем же контекстом
+  // "!Terminal": он покрывает оба случая, а копирование терминала не трогает. Блок
+  // редактора ниже стоит на той же глубине и побеждает, потому что он ниже в файле.
   {
-    "context": "Workspace",
+    "context": "!Terminal",
     "bindings": {
       "secondary-shift-c": null
     }
