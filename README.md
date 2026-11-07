@@ -1,7 +1,7 @@
 # zed-keymap
 
 Сочетания клавиш [Zed](https://zed.dev): vim-режим под раскладку Colemak (перенос colemak.vim),
-окна, фолды и копирование пути к файлу по `cmd-shift-c` на macOS и `ctrl-shift-c` на Windows и Linux
+окна, фолды и копирование пути к файлу (в редакторе и панели файлов) по `cmd-shift-c` на macOS и `ctrl-shift-c` на Windows и Linux
 (в конфиге — `secondary-shift-c`).
 
 ## Установка

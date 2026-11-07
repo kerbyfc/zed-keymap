@@ -200,5 +200,12 @@
     "bindings": {
       "secondary-shift-c": "editor::CopyFileLocation"
     }
+  },
+  // В панели файлов — путь выделенного файла от корня проекта, как у редактора без строки.
+  {
+    "context": "ProjectPanel && not_editing",
+    "bindings": {
+      "secondary-shift-c": "project_panel::CopyRelativePath"
+    }
   }
 ]
