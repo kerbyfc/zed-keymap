@@ -1,0 +1,274 @@
+// Colemak для vim-режима Zed — перенос colemak.vim (Shai Coleman) из ~/.ideavimrc.
+// Блоки идут от общего к частному: внутри одного уровня контекста
+// побеждает тот блок, который в файле НИЖЕ. Пользовательский keymap
+// грузится после vim.json, поэтому всё здесь сильнее дефолтов.
+[
+  // === Движения: normal + visual + operator-pending =========================
+  // VimControl == normal || visual || operator — это аналог сразу
+  // nnoremap + xnoremap + onoremap из colemak.vim.
+  // Хвост `vim_operator != i && vim_operator != a` ОБЯЗАТЕЛЕН: после `d r`
+  // (или `d a`) Zed остаётся в режиме operator и ждёт текстовый объект,
+  // где p/b/B/e/i уже заняты объектами. Без хвоста `d r p` съело бы наше
+  // `p` (till) вместо «внутреннего абзаца».
+  {
+    "context": "VimControl && !menu && vim_operator != i && vim_operator != a",
+    "bindings": {
+      // h n e i вместо h j k l
+      "h": "vim::Left",
+      "n": "vim::Down",
+      "e": "vim::Up",
+      "i": "vim::Right",
+      // слова: l/L назад, u/U конец слова, y/Y вперёд
+      "l": "vim::PreviousWordStart",
+      "shift-l": ["vim::PreviousWordStart", { "ignore_punctuation": true }],
+      "u": "vim::NextWordEnd",
+      "shift-u": ["vim::NextWordEnd", { "ignore_punctuation": true }],
+      "y": "vim::NextWordStart",
+      "shift-y": ["vim::NextWordStart", { "ignore_punctuation": true }],
+      // поиск в строке: p/P = till вперёд/назад (f/F остаются дефолтными)
+      "p": ["vim::PushFindForward", { "before": true, "multiline": false }],
+      "shift-p": ["vim::PushFindBackward", { "after": true, "multiline": false }],
+      // b/B = повтор ; и ,
+      "b": "vim::RepeatFind",
+      "shift-b": "vim::RepeatFindReversed",
+      // k/K = n/N по совпадениям поиска
+      "k": "vim::MoveToNextMatch",
+      "shift-k": "vim::MoveToPreviousMatch"
+    }
+  },
+
+  // === `r` вместо `i` для внутренних объектов: d r p == vim d i p ===========
+  // Только в operator-pending — в normal/visual `r` остаётся заменой символа.
+  // Тот же хвост, чтобы `d r r` досталось дефолтному объекту [ ].
+  {
+    "context": "vim_mode == operator && vim_operator != i && vim_operator != a",
+    "bindings": {
+      "r": ["vim::PushObject", { "around": false }]
+    }
+  },
+
+  // === `w` — оператор change, поэтому `w w` должно значить `c c` ============
+  {
+    "context": "vim_operator == c",
+    "bindings": {
+      "w": "vim::CurrentLine"
+    }
+  },
+
+  // === Normal mode =========================================================
+  {
+    "context": "vim_mode == normal",
+    "bindings": {
+      // вставка s/S, append t/T
+      "s": "vim::InsertBefore",
+      "shift-s": "vim::InsertFirstNonWhitespace",
+      "t": "vim::InsertAfter",
+      "shift-t": "vim::InsertEndOfLine",
+      // change w/W
+      "w": "vim::PushChange",
+      "shift-w": "vim::ChangeToEndOfLine",
+      // cut / copy / paste: x c v и X C V
+      "x": "vim::DeleteRight",
+      // в Zed нет действия «удалить строку», поэтому досылаем клавиши `d d`
+      "shift-x": ["workspace::SendKeystrokes", "d d"],
+      "c": "vim::PushYank",
+      "shift-c": "vim::YankLine",
+      "v": "vim::Paste",
+      "shift-v": ["vim::Paste", { "before": true }],
+      // undo / redo: z, gz, Z. Точный бинд `z` гасит ожидание дефолтных
+      // последовательностей `z t`, `z z` и т.п. — нулить их не нужно.
+      "z": "vim::Undo",
+      "g z": "vim::UndoLastLine",
+      "shift-z": "vim::Redo",
+      // visual a/A, ga == vim gv
+      "a": "vim::ToggleVisual",
+      "shift-a": "vim::ToggleVisualLine",
+      "g a": "vim::RestoreVisualSelection",
+      // вытесненные клавиши возвращаются под префиксом g
+      "g shift-x": "vim::DeleteLeft",
+      "g shift-k": "editor::Hover",
+      "g shift-l": "vim::WindowBottom"
+    }
+  },
+
+  // === Visual mode =========================================================
+  {
+    "context": "vim_mode == visual",
+    "bindings": {
+      // s/S/t/T — вставка в начало/конец выделения (vim I / A)
+      "s": "vim::InsertBefore",
+      "shift-s": "vim::InsertBefore",
+      "t": "vim::InsertAfter",
+      "shift-t": "vim::InsertAfter",
+      "w": "vim::Substitute",
+      "shift-w": "vim::SubstituteLine",
+      "x": "vim::VisualDelete",
+      "shift-x": "vim::VisualDelete",
+      "c": "vim::VisualYank",
+      "shift-c": "vim::VisualYank",
+      "v": "vim::Paste",
+      // V поверх выделения не затирает регистр — это vim-ское P
+      "shift-v": ["vim::Paste", { "preserve_clipboard": true }],
+      "z": "vim::Undo",
+      "g z": "vim::Undo",
+      "shift-z": "vim::Redo",
+      // a/A — переключение charwise/linewise прямо из визуала
+      "a": "vim::ToggleVisual",
+      "shift-a": "vim::ToggleVisualLine",
+      "g shift-x": "vim::VisualDeleteLine",
+      "g shift-k": "editor::Hover",
+      "g shift-l": "vim::WindowBottom"
+    }
+  },
+
+  // === Фолды и скролл: префикс j вместо z (z занят под undo) ===============
+  // `"j": null` снимает дефолтное j = вниз и делает j чистым префиксом;
+  // в operator-pending j намеренно остаётся движением вниз, как в colemak.vim.
+  {
+    "context": "vim_mode == normal || vim_mode == visual",
+    "bindings": {
+      "j": null,
+      "j a": "editor::ToggleFold",
+      "j shift-a": "editor::ToggleFoldRecursive",
+      "j c": "editor::Fold",
+      "j shift-c": "editor::FoldRecursive",
+      "j o": "editor::UnfoldLines",
+      "j shift-o": "editor::UnfoldRecursive",
+      "j f": "editor::FoldSelectedRanges",
+      "j shift-m": "editor::FoldAll",
+      "j shift-r": "editor::UnfoldAll",
+      "j t": "editor::ScrollCursorTop",
+      "j z": "editor::ScrollCursorCenter",
+      "j b": "editor::ScrollCursorBottom",
+      "j l": "vim::ColumnRight",
+      "j h": "vim::ColumnLeft",
+      "j shift-l": "vim::HalfPageRight",
+      "j shift-h": "vim::HalfPageLeft",
+      // составные z-команды: досылаем уже колемаковские клавиши,
+      // поэтому внутри j..., e вместо k, n вместо j, g L вместо L
+      "j enter": ["workspace::SendKeystrokes", "j t ^"],
+      "j -": ["workspace::SendKeystrokes", "j b ^"],
+      "j .": ["workspace::SendKeystrokes", "j z ^"],
+      "j ^": ["workspace::SendKeystrokes", "shift-h e j b ^"],
+      "j +": ["workspace::SendKeystrokes", "g shift-l n j t ^"]
+    }
+  },
+
+  // === Окна: <C-W> h/n/e/i ================================================
+  // Контекст повторяет дефолтный блок vim.json, чтобы работало и в панелях.
+  {
+    "context": "VimControl && !menu || !Editor && !Terminal",
+    "bindings": {
+      "ctrl-w h": "workspace::ActivatePaneLeft",
+      // по дефолту ctrl-w n — новый файл в сплите, перекрываем
+      "ctrl-w n": "workspace::ActivatePaneDown",
+      "ctrl-w e": "workspace::ActivatePaneUp",
+      "ctrl-w i": "workspace::ActivatePaneRight"
+    }
+  },
+
+  // === Командная строка: C-l / C-y по словам ===============================
+  // В Zed `:` открывает палитру команд, отдельного vim-cmdline нет,
+  // поэтому это приближение cnoremap <C-L>/<C-Y> на <C-Left>/<C-Right>.
+  {
+    "context": "CommandPalette > Picker > Editor",
+    "bindings": {
+      "ctrl-l": "editor::MoveToPreviousWordStart",
+      "ctrl-y": "editor::MoveToNextWordEnd"
+    }
+  },
+  // То же в строке поиска (`/` и `?`)
+  {
+    "context": "BufferSearchBar && !in_replace > Editor",
+    "bindings": {
+      "ctrl-l": "editor::MoveToPreviousWordStart",
+      "ctrl-y": "editor::MoveToNextWordEnd"
+    }
+  },
+  {
+    "context": "Workspace",
+    "bindings": {
+      "cmd-shift-c": null
+    }
+  },
+  {
+    "context": "Editor && mode == full",
+    "bindings": {
+      "cmd-shift-c": "editor::CopyFileLocation"
+    }
+  },
+  {
+    // Клавиши отладки из кокпита Deckmasters. Образец и доводы — .zed/keymap.example.json
+    // в репозитории. alt-0 открывает список конфигураций отладки, alt-1 набирает в нём
+    // префикс «attach» и подтверждает. Одна клавиша на обе цели: конфигурации разнесены по
+    // каталогам (apps/game, apps/socket, apps/client), Zed читает .zed/debug.json только в
+    // корне открытого каталога, и в каждом списке attach единственный. Оба нажатия кокпит
+    // посылает сам системным событием, открыв нужный каталог дерева в Zed.
+    "bindings": {
+      "alt-0": "debugger::Start",
+      "alt-1": ["workspace::SendKeystrokes", "attach enter"]
+    }
+  },
+  {
+    "context": "Workspace && !Terminal",
+    "bindings": {
+      "cmd-r": "task::Spawn"
+    }
+  },
+  {
+    "context": "Workspace && !Terminal",
+    "unbind": {
+      "cmd-shift-r": "task::Spawn"
+    }
+  },
+  {
+    "context": "Workspace && !Terminal",
+    "bindings": {
+      "cmd-shift-r": [
+        "task::Rerun",
+        {
+          "reevaluate_context": false
+        }
+      ]
+    }
+  },
+  {
+    "context": "Workspace && !Terminal",
+    "unbind": {
+      "alt-cmd-r": [
+        "task::Rerun",
+        {
+          "reevaluate_context": false
+        }
+      ]
+    }
+  },
+  {
+    "bindings": {
+      "alt-r": "debugger::Start"
+    }
+  },
+  {
+    "context": "(vim_mode == helix_normal || vim_mode == helix_select) && !menu",
+    "unbind": {
+      "space shift-g l": "debugger::Start"
+    }
+  },
+  {
+    "context": "(vim_mode == helix_normal || vim_mode == helix_select) && !menu",
+    "unbind": {
+      "space shift-g r": "debugger::Restart"
+    }
+  },
+  {
+    "bindings": {
+      "alt-shift-r": "debugger::Rerun"
+    }
+  },
+  {
+    "context": "Workspace",
+    "unbind": {
+      "f5": "debugger::Rerun"
+    }
+  }
+]
