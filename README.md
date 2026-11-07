@@ -1,7 +1,8 @@
 # zed-keymap
 
 Сочетания клавиш [Zed](https://zed.dev): vim-режим под раскладку Colemak (перенос colemak.vim),
-окна, фолды и копирование пути к файлу по `cmd-shift-c`.
+окна, фолды и копирование пути к файлу по `cmd-shift-c` на macOS и `ctrl-shift-c` на Windows и Linux
+(в конфиге — `secondary-shift-c`).
 
 ## Установка
 
@@ -32,5 +33,3 @@ Copy-Item keymap.json "$env:APPDATA\Zed\keymap.json" -Force
 ```powershell
 New-Item -ItemType SymbolicLink -Path "$env:APPDATA\Zed\keymap.json" -Target "$PWD\keymap.json" -Force
 ```
-
-`cmd-shift-c` на Windows — это Win+Shift+C: сочетание может перехватить система.

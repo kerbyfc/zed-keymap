@@ -188,13 +188,13 @@
   {
     "context": "Workspace",
     "bindings": {
-      "cmd-shift-c": null
+      "secondary-shift-c": null
     }
   },
   {
     "context": "Editor && mode == full",
     "bindings": {
-      "cmd-shift-c": "editor::CopyFileLocation"
+      "secondary-shift-c": "editor::CopyFileLocation"
     }
   }
 ]
