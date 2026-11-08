@@ -226,6 +226,14 @@
       "secondary-r": "task::Spawn"
     }
   },
+  // В vim-режиме ctrl-r — redo и в редакторе сильнее блока Workspace; redo здесь на Z,
+  // поэтому клавиша отдана задачам.
+  {
+    "context": "VimControl && !menu",
+    "bindings": {
+      "secondary-r": "task::Spawn"
+    }
+  },
   {
     "context": "Workspace && !Terminal",
     "unbind": {
