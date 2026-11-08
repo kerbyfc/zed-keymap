@@ -207,5 +207,13 @@
     "bindings": {
       "secondary-shift-c": "project_panel::CopyPath"
     }
+  },
+  // Отладка: alt-0 открывает список конфигураций, alt-1 набирает в нём «attach» и
+  // подтверждает — старт конфигурации, чьё имя начинается с attach.
+  {
+    "bindings": {
+      "alt-0": "debugger::Start",
+      "alt-1": ["workspace::SendKeystrokes", "attach enter"]
+    }
   }
 ]
