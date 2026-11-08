@@ -215,5 +215,54 @@
       "alt-0": "debugger::Start",
       "alt-1": ["workspace::SendKeystrokes", "attach enter"]
     }
+  },
+
+  // === Задачи и отладка: secondary — cmd на macOS, ctrl на Windows и Linux ==
+  // secondary-r — список задач, secondary-shift-r — перезапуск последней задачи с тем же
+  // контекстом (файл и строка прошлого запуска). Стандартные cmd-shift-r и alt-cmd-r macOS сняты.
+  {
+    "context": "Workspace && !Terminal",
+    "bindings": {
+      "secondary-r": "task::Spawn"
+    }
+  },
+  {
+    "context": "Workspace && !Terminal",
+    "unbind": {
+      "cmd-shift-r": "task::Spawn"
+    }
+  },
+  {
+    "context": "Workspace && !Terminal",
+    "bindings": {
+      "secondary-shift-r": ["task::Rerun", { "reevaluate_context": false }]
+    }
+  },
+  {
+    "context": "Workspace && !Terminal",
+    "unbind": {
+      "alt-cmd-r": ["task::Rerun", { "reevaluate_context": false }]
+    }
+  },
+  // alt-r — список конфигураций отладки, alt-shift-r — перезапуск последней сессии;
+  // стандартные space G l / space G r Helix и f5 сняты.
+  {
+    "bindings": {
+      "alt-r": "debugger::Start",
+      "alt-shift-r": "debugger::Rerun"
+    }
+  },
+  {
+    "context": "(vim_mode == helix_normal || vim_mode == helix_select) && !menu",
+    "unbind": {
+      "space shift-g l": "debugger::Start",
+      "space shift-g r": "debugger::Restart"
+    }
+  },
+  {
+    "context": "Workspace",
+    "unbind": {
+      "f5": "debugger::Rerun"
+    }
   }
 ]
